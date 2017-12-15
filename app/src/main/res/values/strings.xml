@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Facebook</string>
+    <string name="facebook_app_id">200117717218663</string>
+    <string name="cancel_login">Vuelva a intentar otra vez</string>
+    <string name="error_login">Ocurrio un error al momento de ingresar, vuelva a intentar mas tarde</string>
+    <string name="logout">Cerrar Sesión</string>
+    <string name="login">Registrate con facebook</string>
+</resources>
