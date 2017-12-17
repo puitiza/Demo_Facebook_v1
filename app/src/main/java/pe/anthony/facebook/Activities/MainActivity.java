@@ -21,7 +21,7 @@ import java.io.File;
 import java.net.URL;
 
 import pe.anthony.facebook.R;
-import pe.anthony.facebook.SharedPreferences.PrefUtil;
+import pe.anthony.facebook.Util.PrefUtil;
 import pe.anthony.facebook.Util.TargetPicasso;
 
 public class MainActivity extends AppCompatActivity {

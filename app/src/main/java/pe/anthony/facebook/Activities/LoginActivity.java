@@ -22,7 +22,7 @@ import java.net.URL;
 import java.util.Arrays;
 
 import pe.anthony.facebook.R;
-import pe.anthony.facebook.SharedPreferences.PrefUtil;
+import pe.anthony.facebook.Util.PrefUtil;
 
 public class LoginActivity extends AppCompatActivity {
 

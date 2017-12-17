@@ -19,7 +19,7 @@
 
         <activity android:name=".Activities.MainActivity"/>
         <activity android:name=".Activities.LoginActivity" />
-        <activity android:name=".Util.SplashActivity"
+        <activity android:name=".SplashScreen.SplashActivity"
             android:theme="@style/SplashScreen">
             <intent-filter>
             <action android:name="android.intent.action.MAIN" />

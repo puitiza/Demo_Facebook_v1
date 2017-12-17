@@ -1,4 +1,4 @@
-package pe.anthony.facebook.Util;
+package pe.anthony.facebook.SplashScreen;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,7 +9,7 @@ import com.facebook.login.LoginManager;
 
 import pe.anthony.facebook.Activities.LoginActivity;
 import pe.anthony.facebook.Activities.MainActivity;
-import pe.anthony.facebook.SharedPreferences.PrefUtil;
+import pe.anthony.facebook.Util.PrefUtil;
 
 public class SplashActivity extends AppCompatActivity {
 

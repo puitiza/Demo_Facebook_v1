@@ -1,4 +1,4 @@
-package pe.anthony.facebook.SharedPreferences;
+package pe.anthony.facebook.Util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
