@@ -1,4 +1,4 @@
-package pe.anthony.facebook.SplashScreen;
+package pe.anthony.facebook.Util;
 
 import android.content.Intent;
 import android.os.Bundle;

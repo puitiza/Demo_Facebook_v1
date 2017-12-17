@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="pe.anthony.facebook">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -18,7 +19,7 @@
 
         <activity android:name=".Activities.MainActivity"/>
         <activity android:name=".Activities.LoginActivity" />
-        <activity android:name=".SplashScreen.SplashActivity"
+        <activity android:name=".Util.SplashActivity"
             android:theme="@style/SplashScreen">
             <intent-filter>
             <action android:name="android.intent.action.MAIN" />
