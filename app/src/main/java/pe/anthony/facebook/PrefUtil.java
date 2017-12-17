@@ -3,6 +3,11 @@ package pe.anthony.facebook;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.net.URL;
+
 /**
  * Created by ANTHONY on 15/12/2017.
  */
@@ -35,7 +40,7 @@ public class PrefUtil {
     public String getToken(){return preferences.getString("fb_access_token",null);}
 
 
-    public void saveFacebookUserInfo(String iD,String name, String email, String birthday,String friends, String profileURL){
+   /* public void saveFacebookUserInfo(String iD,String name, String email, String birthday,String friends, String profileURL){
         editor.putString(ID,iD);
         editor.putString(NAME,name);
         editor.putString(EMAIL,email);
@@ -43,7 +48,7 @@ public class PrefUtil {
         editor.putString(COUNT_FRIENDS,friends);
         editor.putString(PROFILEURL,profileURL);
         editor.apply(); //Recuerda que el apply es mejor que el .commit() porque el .apply() es Asincrono
-    }
+    }*/
 
     public void clearSharedPreferences(){
         editor.clear();
@@ -58,4 +63,23 @@ public class PrefUtil {
     public String getUserFB_countFriends(){return preferences.getString(COUNT_FRIENDS,"No tiene FRIENDS");}
     public String getUserFB_profileUrl(){return preferences.getString(PROFILEURL,"No tiene PROFILEURL");}
 
+    public void saveFacebookUserInfo(JSONObject object, URL profile_picture) {
+        try {
+            String iD = object.getString("id");
+            String name = object.getString("name");
+            String email = object.getString("email");
+            String birthday = object.getString("birthday");
+            String friends = object.getJSONObject("friends").getJSONObject("summary").getString("total_count");
+
+            editor.putString(ID,iD);
+            editor.putString(NAME,name);
+            editor.putString(EMAIL,email);
+            editor.putString(BIRTHDAY,birthday);
+            editor.putString(COUNT_FRIENDS,friends);
+            editor.putString(PROFILEURL,profile_picture.toString());
+            editor.apply();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 }
