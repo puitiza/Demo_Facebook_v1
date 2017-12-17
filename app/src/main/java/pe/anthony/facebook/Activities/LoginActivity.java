@@ -1,5 +1,6 @@
 package pe.anthony.facebook.Activities;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -29,6 +30,7 @@ public class LoginActivity extends AppCompatActivity {
     private CallbackManager callbackManager; //esto es propio y necesario de facebook
 //    private SharedPreferences prefs;    //Esto es para guardar al usuario logeado
     private static final String TAG="facebook_login";//Esto solo sirve para el log, posteriormente se va a borrar
+    ProgressDialog mDialog;
     PrefUtil session;
 
     @Override
@@ -63,9 +65,13 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void getUserDetails(LoginResult loginResult) {
+        mDialog = new ProgressDialog(LoginActivity.this);
+        mDialog.setMessage("Reciviendo los Datos");
+        mDialog.show();
         GraphRequest request = GraphRequest.newMeRequest(loginResult.getAccessToken(), new GraphRequest.GraphJSONObjectCallback() {
             @Override
             public void onCompleted(JSONObject object, GraphResponse response) {
+                mDialog.dismiss();
                 //getting FB user data
                 saveFacebookData(object);
                 goMainActivity(object);
