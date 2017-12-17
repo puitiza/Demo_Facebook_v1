@@ -1,6 +1,7 @@
-package pe.anthony.facebook;
+package pe.anthony.facebook.App;
 
 import android.app.Application;
+import android.os.SystemClock;
 
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
@@ -22,6 +23,7 @@ public class FacebookApp extends Application {
         super.onCreate();
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(this);
+        SystemClock.sleep(1000);
     }
 //    Luego de implemntar esto solo tienes que agregar en el manifest esto  android:name=".FacebookApp"
 }

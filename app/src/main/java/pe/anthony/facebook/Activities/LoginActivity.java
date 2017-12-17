@@ -1,4 +1,4 @@
-package pe.anthony.facebook;
+package pe.anthony.facebook.Activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,6 +19,9 @@ import org.json.JSONObject;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+
+import pe.anthony.facebook.R;
+import pe.anthony.facebook.SharedPreferences.PrefUtil;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -41,7 +44,9 @@ public class LoginActivity extends AppCompatActivity {
 
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
-            public void onSuccess(LoginResult loginResult) {
+            public void onSuccess(LoginResult loginResult) {//Este metodo es cuando ya tenga una respuesta de exito e iniziaste sesion
+//                loginButton.setVisibility(View.INVISIBLE);  //<-IMPORTANTE para que ya no me salga logout de facebook en el mismo activity
+//                en caso de que quieres que no se muestre solo puedes hacer eso
                 getUserDetails(loginResult);
             }
 
@@ -69,6 +74,7 @@ public class LoginActivity extends AppCompatActivity {
 
         //Estoy mandando los campos que voy a usar
         Bundle parameters = new Bundle();
+        //Recuerda que del inicio de sesion el JSONobject solo tiene 6 campos porque solo haz pedido estos
         parameters.putString("fields","id,name,email,birthday,friends,picture.width(250).height(250)");
         request.setParameters(parameters);
         request.executeAsync();
@@ -86,14 +92,16 @@ public class LoginActivity extends AppCompatActivity {
             }catch (MalformedURLException e){
                 e.printStackTrace();
             }
+/*          Antes mandaba como parametro muchas variables ahora que esta en una clase solo necesito mandar un solo parametro
             String iD = object.getString("id");
             String name = object.getString("name");
             String email = object.getString("email");
             String birhtday = object.getString("birthday");
             String friends = object.getJSONObject("friends").getJSONObject("summary").getString("total_count");
+            saveFacebookUserInfo(iD,name,email,birhtday,friends,profile_pic.toString());
+            session.saveFacebookUserInfo(iD,name,email,birhtday,friends,profile_pic.toString());*/
 
-//            saveFacebookUserInfo(iD,name,email,birhtday,friends,profile_pic.toString());                                //
-            session.saveFacebookUserInfo(iD,name,email,birhtday,friends,profile_pic.toString());
+            session.saveFacebookUserInfo(object,profile_pic);
         }catch (Exception e){
             Log.d(TAG,"BUNDLE Exception : "+e.toString());
         }
@@ -117,6 +125,7 @@ public class LoginActivity extends AppCompatActivity {
 //        en mi pantalla principal no se vaya a mi pantalla de login y salga directamente de la aplicacion
         intent.putExtra("userProfile",object.toString());
         startActivity(intent);
+        finish();   //<-Esto es para cerrar esta activity y no se que haciendo el logout de facebook y  pase al siguiente activity
     }
 
     @Override

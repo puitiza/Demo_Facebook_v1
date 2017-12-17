@@ -1,4 +1,4 @@
-package pe.anthony.facebook;
+package pe.anthony.facebook.Activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,6 +15,9 @@ import com.squareup.picasso.Picasso;
 import org.json.JSONObject;
 
 import java.net.URL;
+
+import pe.anthony.facebook.R;
+import pe.anthony.facebook.SharedPreferences.PrefUtil;
 
 public class MainActivity extends AppCompatActivity {
 
