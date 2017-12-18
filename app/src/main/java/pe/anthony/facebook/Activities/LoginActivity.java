@@ -42,7 +42,8 @@ public class LoginActivity extends AppCompatActivity {
         callbackManager = CallbackManager.Factory.create();
         loginButton = findViewById(R.id.login_button);
         //Aqui le damos los permisos para la foto y los demas datos del usuaario
-        loginButton.setReadPermissions(Arrays.asList("public_profile","email","user_birthday","user_friends"));
+        loginButton.setReadPermissions(Arrays.asList("public_profile","email","user_birthday","user_friends","email, publish_actions"));
+        // "email, publish_actions" <-- Exactamente ese permiso es lo que se necesita para compartir contenido en la app
 
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override

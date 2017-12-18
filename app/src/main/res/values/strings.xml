@@ -5,4 +5,5 @@
     <string name="error_login">Ocurrio un error al momento de ingresar, comprueba tu conexion a internet</string>
     <string name="logout">Cerrar Sesión</string>
     <string name="login">Registrate con facebook</string>
+    <string name="error_sharedContent">No tienes accceso a internet, intenta más tarde</string>
 </resources>

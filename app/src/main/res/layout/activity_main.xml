@@ -33,6 +33,18 @@
        android:layout_width="match_parent"
        android:layout_height="wrap_content" />
    <Button
+       android:id="@+id/button_shareContent"
+       android:layout_gravity="center"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:text="Share Content"/>
+   <Button
+       android:id="@+id/btn_imageShare"
+       android:layout_gravity="center"
+       android:layout_width="180dp"
+       android:layout_height="45dp"
+       android:background="@drawable/share_image" />
+   <Button
        android:id="@+id/logout"
        android:text="@string/logout"
        android:layout_gravity="center"
