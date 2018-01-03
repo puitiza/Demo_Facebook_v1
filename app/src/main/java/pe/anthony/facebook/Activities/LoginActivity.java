@@ -1,8 +1,11 @@
 package pe.anthony.facebook.Activities;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
@@ -14,6 +17,7 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.karan.churi.PermissionManager.PermissionManager;
 
 import org.json.JSONObject;
 
@@ -30,6 +34,10 @@ public class LoginActivity extends AppCompatActivity {
     private CallbackManager callbackManager; //esto es propio y necesario de facebook
 //    private SharedPreferences prefs;    //Esto es para guardar al usuario logeado
     private static final String TAG="facebook_login";//Esto solo sirve para el log, posteriormente se va a borrar
+
+    //Esto parte de una libreria, para administrar mejor los permisos , solo funciona para android 6
+    PermissionManager permissionManager;
+    public static final String PERMISSION_NEVER="El permiso fue denegado si no quieres volver a ver el mensaje solo dale clic en nunca volver a recodar";
     ProgressDialog mDialog;
     PrefUtil session;
 
@@ -37,6 +45,19 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){//Compruebo la version de mi modelo de celular
+          permissionManager = new PermissionManager(){
+              @Override
+              public void ifCancelledAndCanRequest(Activity activity) {
+                  Toast.makeText(getApplicationContext(),PERMISSION_NEVER,Toast.LENGTH_LONG).show();
+               permissionManager.checkAndRequestPermissions(LoginActivity.this);
+              }
+              @Override
+              public void ifCancelledAndCannotRequest(Activity activity) {
+              }
+          };
+          permissionManager.checkAndRequestPermissions(this);
+        }
         session = new PrefUtil(LoginActivity.this);
 //        prefs= getSharedPreferences("LOGIN_FACEBOOK", Context.MODE_PRIVATE);
         callbackManager = CallbackManager.Factory.create();
@@ -44,7 +65,6 @@ public class LoginActivity extends AppCompatActivity {
         //Aqui le damos los permisos para la foto y los demas datos del usuaario
         loginButton.setReadPermissions(Arrays.asList("public_profile","email","user_birthday","user_friends","email, publish_actions"));
         // "email, publish_actions" <-- Exactamente ese permiso es lo que se necesita para compartir contenido en la app
-
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {//Este metodo es cuando ya tenga una respuesta de exito e iniziaste sesion
@@ -63,6 +83,8 @@ public class LoginActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(),R.string.error_login,Toast.LENGTH_SHORT).show();
             }
         });
+
+
     }
 
     private void getUserDetails(LoginResult loginResult) {
@@ -140,5 +162,10 @@ public class LoginActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         //Este es el metodo que van a llegar las solicitudes y que tenemos que rediriguir al callbackmanger
         callbackManager.onActivityResult(requestCode,resultCode,data);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        permissionManager.checkResult(requestCode,permissions,grantResults);
     }
 }

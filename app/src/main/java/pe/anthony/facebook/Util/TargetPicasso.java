@@ -14,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
+ * Esta clase fue creada para guardar la imagen en la memoria del celular y asi tener la imagen incluso cuando no hay internet
  * Created by ANTHONY on 17/12/2017.
  */
 

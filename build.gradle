@@ -19,6 +19,9 @@ allprojects {
     repositories {
         google()
         jcenter()
+
+//      Esta libreria es PermissionManager perfecta para administar los permisos y si son multiples , pues mejor
+        maven{ url "https://jitpack.io"}
     }
 }
 
