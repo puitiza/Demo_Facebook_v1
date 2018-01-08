@@ -246,8 +246,12 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(),"Permiso permitido",Toast.LENGTH_SHORT).show();
                     shared.selectImageToSharedFacebook();
                 } else {
-                    // Permission Denied
-                    Toast.makeText(MainActivity.this, "Permiso Denegado", Toast.LENGTH_SHORT).show();
+                    if(ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)){
+                        Toast.makeText(MainActivity.this, "Permiso Denegado", Toast.LENGTH_SHORT).show();
+                    }else{
+                        Toast.makeText(MainActivity.this, "Permiso Denegado y se tiene que ir a la configuracion del dispositivo", Toast.LENGTH_SHORT).show();
+                    }
+
                 }
                 break;
             default: super.onRequestPermissionsResult(requestCode, permissions, grantResults);
