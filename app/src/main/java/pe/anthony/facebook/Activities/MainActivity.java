@@ -1,7 +1,9 @@
 package pe.anthony.facebook.Activities;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
@@ -89,10 +91,9 @@ public class MainActivity extends AppCompatActivity {
                             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
                                 if(ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
                                     if(ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,Manifest.permission.WRITE_EXTERNAL_STORAGE)){
-                                        ActivityCompat.requestPermissions(MainActivity.this,
-                                                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},ALLOW_WRITE_EXTERNAL_STORAGE);
+                                        DialogPermisoDenied();
                                     }else{
-                                        startApplicationDetailsActivity(getPackageName());
+                                        DialogAppSetting();
                                     }
                                 }else{//Tienes el permiso
                                     shared.selectImageToSharedFacebook();
@@ -178,6 +179,52 @@ public class MainActivity extends AppCompatActivity {
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    private void DialogAppSetting(){
+//        AlertDialog.Builder builder = new AlertDialog.Builder(this,android.R.style.Theme_Material_Dialog_Alert);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("¿Permites a Facebook  acceder a guardar Imagenes?");
+        builder.setMessage("Facebook usa esto para guardar imagenes en el dispositivo."+ "\n\n" +
+                "Para habilitar esto, clic App Settings abajo.");
+        builder.setPositiveButton("APP SETTINGS", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+                startApplicationDetailsActivity(getPackageName());
+            }
+        });
+        builder.setNegativeButton("NOT NOW", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+//        builder.setIcon(android.R.drawable.ic_dialog_info);
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void DialogPermisoDenied(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("¿Permites a Facebook  acceder a guardar Imagenes?");
+        builder.setMessage("Facebook usa esto para guardar imagenes en el dispositivo.");
+        builder.setPositiveButton("Permitir", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},ALLOW_WRITE_EXTERNAL_STORAGE);
+            }
+        });
+        builder.setNegativeButton("Denegar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
     }
 
     private void startApplicationDetailsActivity(String packageName) {
