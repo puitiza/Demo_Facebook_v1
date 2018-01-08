@@ -1,14 +1,15 @@
 package pe.anthony.facebook.Activities;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -20,7 +21,6 @@ import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.login.LoginManager;
-import com.karan.churi.PermissionManager.PermissionManager;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONObject;
@@ -36,27 +36,24 @@ import pe.anthony.facebook.Util.TargetPicasso;
 public class MainActivity extends AppCompatActivity {
 
     private Button logoutButton,btn_sharedContent,btn_imageSharedFB;
-    JSONObject response, profile_pic_data, profile_pic_url;
-//    private SharedPreferences prefs;
+    JSONObject response;
     PrefUtil session;
     TargetPicasso targetPicasso;
     SharedContentWithFB shared;
 
     private final static int  ALLOW_WRITE_EXTERNAL_STORAGE = 10;
 
-    PermissionManager permissionManager;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         session = new PrefUtil(MainActivity.this);
-//        prefs= getSharedPreferences("LOGIN_FACEBOOK", Context.MODE_PRIVATE);
         if(AccessToken.getCurrentAccessToken() == null){//NO hay session
             goLoginActivity();
         }else{//Aqui es para cuando ya tienes la sesion
-            //Creas una instancia de la clase TargetPicasso
+//            Creas una instancia de la clase TargetPicasso
             targetPicasso = new TargetPicasso(getApplicationContext(),TargetPicasso.IMAGE_ADDRESS,TargetPicasso.IMAGE_NAME);
+//            Creas una instancia de la clase SharedContentWithFB , para compartir contenido de FB
             shared = new SharedContentWithFB(this);
 //          <---Esto es para el login de FB
                 logoutButton = findViewById(R.id.logout);
@@ -66,8 +63,8 @@ public class MainActivity extends AppCompatActivity {
                         goLoginActivity();
                     }
                 });
-                getData();
-//            ----->
+//           ----->
+            getData();
 
 //          <--Esto es para compartir contenido en FB
                 btn_sharedContent = findViewById(R.id.button_shareContent);
@@ -91,20 +88,18 @@ public class MainActivity extends AppCompatActivity {
                         if(isNetworkAvailable()){
                             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
                                 if(ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
-                                    permissionManager = new PermissionManager(){
-                                        @Override
-                                        public void ifCancelledAndCanRequest(Activity activity) {
-                                            Toast.makeText(getApplicationContext(),LoginActivity.PERMISSION_NEVER,Toast.LENGTH_LONG).show();
-                                            permissionManager.checkAndRequestPermissions(MainActivity.this);
-                                        }
-                                        @Override
-                                        public void ifCancelledAndCannotRequest(Activity activity) {
-                                        }
-                                    };
-                                    permissionManager.checkAndRequestPermissions(MainActivity.this);
+                                    if(ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,Manifest.permission.WRITE_EXTERNAL_STORAGE)){
+                                        ActivityCompat.requestPermissions(MainActivity.this,
+                                                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},ALLOW_WRITE_EXTERNAL_STORAGE);
+                                    }else{
+                                        startApplicationDetailsActivity(getPackageName());
+                                    }
+                                }else{//Tienes el permiso
+                                    shared.selectImageToSharedFacebook();
                                 }
+                            }else{
+                                shared.selectImageToSharedFacebook();
                             }
-                            shared.selectImageToSharedFacebook();
                         }else{
                             Toast.makeText(getApplicationContext(),R.string.error_sharedContent,Toast.LENGTH_SHORT).show();
                         }
@@ -158,7 +153,6 @@ public class MainActivity extends AppCompatActivity {
         }catch (Exception e){
             e.printStackTrace();
         }
-
     }
 
     @Override
@@ -168,7 +162,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void goLoginActivity() {
-//        clearSharedPreferences();
         session.clearSharedPreferences();
         targetPicasso.deleteImagePicassoTarget(getApplicationContext());   //Este metodo es para borrar el archivo de la imagen
         LoginManager.getInstance().logOut();//Esto es muy importante para salir de la session y regresar al login
@@ -187,16 +180,31 @@ public class MainActivity extends AppCompatActivity {
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        permissionManager.checkResult(requestCode,permissions,grantResults);
+    private void startApplicationDetailsActivity(String packageName) {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                Uri.fromParts("package", packageName, null));
+        intent.addCategory(Intent.CATEGORY_DEFAULT);
+        intent.setComponent(intent.resolveActivity(this.getPackageManager()));
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY |
+                Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        startActivity(intent);
     }
 
-//    public void clearSharedPreferences(){
-//         prefs.edit().clear().apply();
-//    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode){
+            case ALLOW_WRITE_EXTERNAL_STORAGE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission Granted
+                    Toast.makeText(getApplicationContext(),"Permiso permitido",Toast.LENGTH_SHORT).show();
+                    shared.selectImageToSharedFacebook();
+                } else {
+                    // Permission Denied
+                    Toast.makeText(MainActivity.this, "Permiso Denegado", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            default: super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
 
-//    public String getEmailUser(){
-//        return prefs.getString("fb_email","No hay dato papu");
-//    }
 }

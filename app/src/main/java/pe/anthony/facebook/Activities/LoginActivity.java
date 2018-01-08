@@ -1,11 +1,16 @@
 package pe.anthony.facebook.Activities;
 
-import android.app.Activity;
+import android.Manifest;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
@@ -17,7 +22,6 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
-import com.karan.churi.PermissionManager.PermissionManager;
 
 import org.json.JSONObject;
 
@@ -26,37 +30,38 @@ import java.net.URL;
 import java.util.Arrays;
 
 import pe.anthony.facebook.R;
+import pe.anthony.facebook.Util.FirstRunDetected;
 import pe.anthony.facebook.Util.PrefUtil;
 
 public class LoginActivity extends AppCompatActivity {
 
     private LoginButton loginButton;    //Es el boton de login de facebook
     private CallbackManager callbackManager; //esto es propio y necesario de facebook
-//    private SharedPreferences prefs;    //Esto es para guardar al usuario logeado
-    private static final String TAG="facebook_login";//Esto solo sirve para el log, posteriormente se va a borrar
 
-    //Esto parte de una libreria, para administrar mejor los permisos , solo funciona para android 6
-    PermissionManager permissionManager;
-    public static final String PERMISSION_NEVER="El permiso fue denegado si no quieres volver a ver el mensaje solo dale clic en nunca volver a recodar";
+    private static final String TAG="facebook_login";//Esto solo sirve para el log
+
     ProgressDialog mDialog;
     PrefUtil session;
+
+    //saber si se ha corrido la primera vez
+    FirstRunDetected firstRun;
+    private static final int  Permission_All = 1 ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){//Compruebo la version de mi modelo de celular
-          permissionManager = new PermissionManager(){
-              @Override
-              public void ifCancelledAndCanRequest(Activity activity) {
-                  Toast.makeText(getApplicationContext(),PERMISSION_NEVER,Toast.LENGTH_LONG).show();
-               permissionManager.checkAndRequestPermissions(LoginActivity.this);
-              }
-              @Override
-              public void ifCancelledAndCannotRequest(Activity activity) {
-              }
-          };
-          permissionManager.checkAndRequestPermissions(this);
+        firstRun = new FirstRunDetected(LoginActivity.this);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){ //Compruebo la version de mi modelo de celular si es mayour que la del API 23
+            if(firstRun.loadFirstRun()){
+                Log.i("onCreate: ","first time" );
+                firstRun.saveFirstRun();
+//                Si quieres agrega mas permiso a la cadena te recomiendo maximo 5
+                String[] Permissions ={Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.ACCESS_FINE_LOCATION};
+                if(!hasPermissions(LoginActivity.this,Permissions)){
+                    ActivityCompat.requestPermissions(LoginActivity.this,Permissions,Permission_All);
+                }
+            }
         }
         session = new PrefUtil(LoginActivity.this);
 //        prefs= getSharedPreferences("LOGIN_FACEBOOK", Context.MODE_PRIVATE);
@@ -83,8 +88,6 @@ public class LoginActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(),R.string.error_login,Toast.LENGTH_SHORT).show();
             }
         });
-
-
     }
 
     private void getUserDetails(LoginResult loginResult) {
@@ -121,31 +124,11 @@ public class LoginActivity extends AppCompatActivity {
             }catch (MalformedURLException e){
                 e.printStackTrace();
             }
-/*          Antes mandaba como parametro muchas variables ahora que esta en una clase solo necesito mandar un solo parametro
-            String iD = object.getString("id");
-            String name = object.getString("name");
-            String email = object.getString("email");
-            String birhtday = object.getString("birthday");
-            String friends = object.getJSONObject("friends").getJSONObject("summary").getString("total_count");
-            saveFacebookUserInfo(iD,name,email,birhtday,friends,profile_pic.toString());
-            session.saveFacebookUserInfo(iD,name,email,birhtday,friends,profile_pic.toString());*/
-
             session.saveFacebookUserInfo(object,profile_pic);
         }catch (Exception e){
             Log.d(TAG,"BUNDLE Exception : "+e.toString());
         }
     }
-
-   /* public void saveFacebookUserInfo(String iD,String name, String email, String birthday,String friends, String profileURL){
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString("fb_id",iD);
-        editor.putString("fb_name",name);
-        editor.putString("fb_email",email);
-        editor.putString("fb_birthday",birthday);
-        editor.putString("fb_count_friends",friends);
-        editor.putString("fb_profileURL",profileURL);
-        editor.apply();//Recuerda que el apply es mejor que el .commit() porque el .apply() es Asincrono
-    }*/
 
     private void goMainActivity(JSONObject object) {
         Intent intent = new Intent(this,MainActivity.class);
@@ -166,6 +149,48 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        permissionManager.checkResult(requestCode,permissions,grantResults);
+        switch (requestCode){
+            case Permission_All:
+                boolean allPermissionsGranted = true;
+                if(grantResults.length>0){
+                    for(int grantResult: grantResults){
+                        if(grantResult != PackageManager.PERMISSION_GRANTED){
+                            allPermissionsGranted = false;
+                            break;
+                        }
+                    }
+                }
+                if (allPermissionsGranted) {
+                    // Permission Granted
+                    Toast.makeText(getApplicationContext(),"Los permisos fueron permitido",Toast.LENGTH_SHORT).show();
+                } else {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle("Facebook");
+                    builder.setMessage("Se requieren todos los permisos para que la aplicación funcione correctamente" +
+                            ", por favor activarlos desde la configuración de su disositivo");
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    });
+                    AlertDialog alertDialog = builder.create();
+                    alertDialog.show();
+                }
+                break;
+
+            default: super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
+    public static boolean hasPermissions(Context context, String... permissions){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions!=null){
+            for (String permission :permissions) {
+                if(ActivityCompat.checkSelfPermission(context,permission)!= PackageManager.PERMISSION_GRANTED){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
