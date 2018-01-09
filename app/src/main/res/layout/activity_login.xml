@@ -17,6 +17,17 @@
         android:layout_centerVertical="true"
         android:layout_marginTop="30dp"
         android:layout_marginBottom="30dp" />
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:indeterminate="true"
+        android:visibility="gone" />
+
     <!--
        xmlns:facebook="http://schemas.android.com/apk/res-auto"
        facebook:com_facebook_login_text="@string/login"

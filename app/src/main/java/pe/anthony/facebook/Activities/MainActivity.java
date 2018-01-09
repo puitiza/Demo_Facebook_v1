@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.login.LoginManager;
+import com.google.firebase.auth.FirebaseAuth;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONObject;
@@ -57,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
             targetPicasso = new TargetPicasso(getApplicationContext(),TargetPicasso.IMAGE_ADDRESS,TargetPicasso.IMAGE_NAME);
 //            Creas una instancia de la clase SharedContentWithFB , para compartir contenido de FB
             shared = new SharedContentWithFB(this);
-//          <---Esto es para el login de FB
+//          <---Esto es para el logout de FB
                 logoutButton = findViewById(R.id.logout);
                 logoutButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -165,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
     private void goLoginActivity() {
         session.clearSharedPreferences();
         targetPicasso.deleteImagePicassoTarget(getApplicationContext());   //Este metodo es para borrar el archivo de la imagen
+        FirebaseAuth.getInstance().signOut();//Esto es para poder cerrar sesion en firebase
         LoginManager.getInstance().logOut();//Esto es muy importante para salir de la session y regresar al login
         Intent intent = new Intent(this,LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_NEW_TASK);

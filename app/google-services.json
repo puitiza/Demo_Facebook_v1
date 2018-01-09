@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "413604187771",
+    "firebase_url": "https://facebook-905ae.firebaseio.com",
+    "project_id": "facebook-905ae",
+    "storage_bucket": "facebook-905ae.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:413604187771:android:d944d5c980c67e6c",
+        "android_client_info": {
+          "package_name": "pe.anthony.facebook"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "413604187771-o135t5g2cv94alt06em5886ku95vhc74.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "pe.anthony.facebook",
+            "certificate_hash": "2edd79dfed17e3792e58d17c50aa6f74721e748d"
+          }
+        },
+        {
+          "client_id": "413604187771-o6sdiiu11opvt91vfa8msfeok124tph2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDEZkZ19XYL3v_trqfJpgOyF-1CQpRQO5Y"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "413604187771-o6sdiiu11opvt91vfa8msfeok124tph2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

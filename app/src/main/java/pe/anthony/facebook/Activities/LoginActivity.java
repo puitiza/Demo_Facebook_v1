@@ -13,8 +13,11 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -22,6 +25,13 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FacebookAuthProvider;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import org.json.JSONObject;
 
@@ -32,6 +42,7 @@ import java.util.Arrays;
 import pe.anthony.facebook.R;
 import pe.anthony.facebook.Util.FirstRunDetected;
 import pe.anthony.facebook.Util.PrefUtil;
+import pe.anthony.facebook.Util.SaveLoginResult;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -47,10 +58,18 @@ public class LoginActivity extends AppCompatActivity {
     FirstRunDetected firstRun;
     private static final int  Permission_All = 1 ;
 
+    //Esto es para una autentificacion en firebase
+    private FirebaseAuth firebaseAuth;
+    private FirebaseAuth.AuthStateListener firebaseAuthListener;
+    SaveLoginResult saveLoginResult;
+
+    private ProgressBar progressBar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        progressBar = findViewById(R.id.progress_bar);
         firstRun = new FirstRunDetected(LoginActivity.this);
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){ //Compruebo la version de mi modelo de celular si es mayour que la del API 23
             if(firstRun.loadFirstRun()){
@@ -70,12 +89,16 @@ public class LoginActivity extends AppCompatActivity {
         //Aqui le damos los permisos para la foto y los demas datos del usuaario
         loginButton.setReadPermissions(Arrays.asList("public_profile","email","user_birthday","user_friends","email, publish_actions"));
         // "email, publish_actions" <-- Exactamente ese permiso es lo que se necesita para compartir contenido en la app
+
+        saveLoginResult = new SaveLoginResult();
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {//Este metodo es cuando ya tenga una respuesta de exito e iniziaste sesion
 //                loginButton.setVisibility(View.INVISIBLE);  //<-IMPORTANTE para que ya no me salga logout de facebook en el mismo activity
 //                en caso de que quieres que no se muestre solo puedes hacer eso
-                getUserDetails(loginResult);
+//                getUserDetails(loginResult);
+                saveLoginResult.setLoginResult(loginResult);    //Solo estoy haciendo esto porque estoy guardando loginResult
+                handleFacebookAccessToken(loginResult.getAccessToken());
             }
 
             @Override
@@ -86,6 +109,36 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onError(FacebookException error) {
                 Toast.makeText(getApplicationContext(),R.string.error_login,Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        firebaseAuth = FirebaseAuth.getInstance();
+        firebaseAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+            //Este metodo es asincronico y se ejecuta cuando se detecta algun cambio de estado en la autentificacion
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if(user != null){
+                    getUserDetails(saveLoginResult.getLoginResult());
+                }
+            }
+        };
+    }
+
+    private void handleFacebookAccessToken(AccessToken accessToken) {
+        progressBar.setVisibility(View.VISIBLE);
+        loginButton.setVisibility(View.GONE);
+        AuthCredential credential = FacebookAuthProvider.getCredential(accessToken.getToken());
+        firebaseAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+            //Este metodo se ejecuta cuando termina todo el proceso de autentificar
+                if(!task.isSuccessful()){
+                    Toast.makeText(getApplicationContext(),"Error en firebase",Toast.LENGTH_SHORT).show();
+                }
+//                Se puede decir que cuando teminar de autenficar se regresa el progressBar a como estaba
+//                progressBar.setVisibility(View.GONE);
+//                loginButton.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -142,9 +195,9 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
         //Este es el metodo que van a llegar las solicitudes y que tenemos que rediriguir al callbackmanger
         callbackManager.onActivityResult(requestCode,resultCode,data);
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -192,5 +245,19 @@ public class LoginActivity extends AppCompatActivity {
             }
         }
         return true;
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        //Aca estoy diciendo el momento que debe empezar a escuchar el oyente
+        firebaseAuth.addAuthStateListener(firebaseAuthListener);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        //Aca estoy diciendo cuando debe detenerse de escuchar
+        firebaseAuth.removeAuthStateListener(firebaseAuthListener);
     }
 }
