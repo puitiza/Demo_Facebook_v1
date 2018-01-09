@@ -297,5 +297,4 @@ public class MainActivity extends AppCompatActivity {
             default: super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
-
 }
