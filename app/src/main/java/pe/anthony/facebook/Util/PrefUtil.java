@@ -39,17 +39,6 @@ public class PrefUtil {
 
     public String getToken(){return preferences.getString("fb_access_token",null);}
 
-
-   /* public void saveFacebookUserInfo(String iD,String name, String email, String birthday,String friends, String profileURL){
-        editor.putString(ID,iD);
-        editor.putString(NAME,name);
-        editor.putString(EMAIL,email);
-        editor.putString(BIRTHDAY,birthday);
-        editor.putString(COUNT_FRIENDS,friends);
-        editor.putString(PROFILEURL,profileURL);
-        editor.apply(); //Recuerda que el apply es mejor que el .commit() porque el .apply() es Asincrono
-    }*/
-
     public void clearSharedPreferences(){
         editor.clear();
         editor.apply();

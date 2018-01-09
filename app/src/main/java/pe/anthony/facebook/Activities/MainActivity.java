@@ -21,9 +21,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.facebook.AccessToken;
 import com.facebook.login.LoginManager;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONObject;
@@ -51,12 +51,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         session = new PrefUtil(MainActivity.this);
-        if(AccessToken.getCurrentAccessToken() == null){//NO hay session
+//      Esto es para una autentificacion con firebase que usa ya la session de facebook
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user == null){
+//      NO hay session de usuario de FB: antes usaba esto para cuando solo se registraba por FB if(AccessToken.getCurrentAccessToken() == null)
             goLoginActivity();
-        }else{//Aqui es para cuando ya tienes la sesion
-//            Creas una instancia de la clase TargetPicasso
+        }else{
+//      Aqui es para cuando ya tienes la sesion del usuario con FireBase
+//          Creas una instancia de la clase TargetPicasso
             targetPicasso = new TargetPicasso(getApplicationContext(),TargetPicasso.IMAGE_ADDRESS,TargetPicasso.IMAGE_NAME);
-//            Creas una instancia de la clase SharedContentWithFB , para compartir contenido de FB
+//          Creas una instancia de la clase SharedContentWithFB , para compartir contenido de FB
             shared = new SharedContentWithFB(this);
 //          <---Esto es para el logout de FB
                 logoutButton = findViewById(R.id.logout);
@@ -67,8 +71,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 //           ----->
-            getData();
-
+//            getDataWithFB();
+            getDataWithFirebase(user);
 //          <--Esto es para compartir contenido en FB
                 btn_sharedContent = findViewById(R.id.button_shareContent);
                 btn_sharedContent.setOnClickListener(new View.OnClickListener() {
@@ -111,7 +115,41 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void getData() {
+    private void getDataWithFirebase(FirebaseUser user) {
+//      Una vez que se autentico el usuario usando firebase ya es mas sencillo saber quien es , su email, su foto y otra informacion no se tiene que usar sharedPreferences
+        TextView txt_name = findViewById(R.id.txt_name);
+        TextView txtEmail= findViewById(R.id.txt_Email);
+        TextView txtCumple= findViewById(R.id.txt_Cumple);
+        TextView txtFriend= findViewById(R.id.txt_Friend);
+        ImageView imgAvatar = findViewById(R.id.imgAvatar);
+
+        txt_name.setText(user.getDisplayName());
+        txtEmail.setText(user.getEmail());
+//      Esto no puedo sacar de Firebase porque esta informacion solo esta disponible en Facebook y si quiero sacar mas de esa informacion solo tendria
+//      que hacerlo desde ahi
+        txtCumple.setText(session.getUserFB_birthday());
+        txtFriend.setText("Friends"+session.getUserFB_countFriends());
+        try {
+                if(isNetworkAvailable()){
+//                  URL profile_picture = new URL(user.getPhotoUrl().toString()); -->Esto es con firebase sacando la imagen pero no esta tan buena
+//                  [->Esto es con Facebook sacando la imagen en HD, ya depende muhco el tamaño de la imagen si no es grande usa firebase
+                    URL profile_picture = new URL(session.getUserFB_profileUrl());
+                    Picasso.with(this).load(profile_picture.toString()).into(imgAvatar);
+                    //Bueno como tengo conexion entonces estoy guardando la foto de perfil de la ultima imagen que tiene como usuario de facebook
+                    targetPicasso.deleteImagePicassoTarget(getApplicationContext());
+                    Picasso.with(this).load(profile_picture.toString()).into(targetPicasso.piccassoImageTarget());
+                }else{
+                    // Esto es para cargar la imagen que ha sido guardada para no volver a traerla de internet
+                    File myImageFile = targetPicasso.loadImagePicassoTarget(getApplicationContext());
+                    Picasso.with(this).load(myImageFile).into(imgAvatar);
+                }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void getDataWithFB() {
         Intent intent = getIntent();
         String jsonData = intent.getStringExtra("userProfile");
         TextView txt_name = findViewById(R.id.txt_name);
