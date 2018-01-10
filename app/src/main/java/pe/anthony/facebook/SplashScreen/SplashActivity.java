@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 import pe.anthony.facebook.Activities.LoginActivity;
 import pe.anthony.facebook.Activities.MainActivity;
+import pe.anthony.facebook.R;
 import pe.anthony.facebook.Util.PrefUtil;
 
 public class SplashActivity extends AppCompatActivity {
@@ -42,6 +43,7 @@ public class SplashActivity extends AppCompatActivity {
         Intent intent = new Intent(this,MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
+        overridePendingTransition(R.anim.right_go_in, R.anim.right_go_out); //Esto es una transicion hacia la right solo se necesita R.anim.right_go_in, R.anim.right_go_out
     }
 
     private void goLoginActivity() {
@@ -51,5 +53,6 @@ public class SplashActivity extends AppCompatActivity {
         Intent intent = new Intent(this,LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK |Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
+        overridePendingTransition(R.anim.left_go_in, R.anim.left_go_out); //Esto es una transicion hacia la left solo se necesita R.anim.left_go_in, R.anim.left_go_out
     }
 }
